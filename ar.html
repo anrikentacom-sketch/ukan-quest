@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>風の勇者の休日 POC - AR</title>
+    <!-- A-Frame -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <!-- MindAR for A-Frame (Image Tracking for stability in POC, or GPS) -->
+    <!-- For this POC step 3, we use a simple GPS-like simulation or Image Tracking fallback. 
+         Ideally MindAR.js or AR.js location-based. 
+         Using AR.js for location-based simply as it is vanilla compatible for rapid POC. -->
+    <script src='https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js'></script>
+
+    <style>
+        .ui-overlay {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .status-box {
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .back-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #d63031;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            pointer-events: auto;
+            z-index: 100;
+        }
+    </style>
+</head>
+
+<body style="margin: 0; overflow: hidden;">
+
+    <div class="ui-overlay">
+        <div class="status-box">
+            GPS AR TEST<br>
+            <small>北の方角に赤い箱が出ます（シミュレーション）</small>
+        </div>
+    </div>
+
+    <a href="index.html" class="back-btn">地図に戻る</a>
+
+    <!-- GPS AR Scene (Using AR.js Location Based) -->
+    <!-- Note: For local testing without HTTPS, typical location-based AR fails. 
+         This code assumes deployment to GitHub Pages (HTTPS). -->
+    <a-scene vr-mode-ui="enabled: false" embedded arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;">
+
+        <!-- 
+            For POC purposes, we place an object "North" relative to the user 
+            instead of strict GPS coordinates initially to verify 'AR capability' 
+            without needing to be physically in Ukan. 
+            Once on site, we change <a-entity gps-entity-place...> 
+        -->
+
+        <!-- Simulate "Wind Spirit" as a Red Box -->
+        <!-- Position 0 0 -5 means 5 meters in front of the camera start position -->
+        <a-box position="0 0 -5" rotation="0 45 0" color="#ef5777" scale="1 1 1"
+            animation="property: rotation; to: 0 405 0; loop: true; dur: 5000">
+        </a-box>
+
+        <a-text value="Spirit of Wind" position="0 1.5 -5" align="center" color="white" scale="2 2 2"></a-text>
+
+        <a-camera gps-camera rotation-reader></a-camera>
+    </a-scene>
+
+</body>
+
+</html>

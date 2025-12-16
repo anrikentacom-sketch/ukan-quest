@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>風の勇者の休日 POC - Map</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        .ui-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .btn {
+            background: #00b894;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            pointer-events: auto;
+            text-decoration: none;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="map"></div>
+
+    <div class="ui-overlay">
+        <a href="ar.html" class="btn">ARモードへ切り替え</a>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        // うかん常山公園の座標 (住所検索による概算)
+        // Address: 4882-1 Ukancho Ukan, Takahashi, Okayama
+        const PARK_LAT = 34.869372;
+        const PARK_LNG = 133.567156;
+
+        const map = L.map('map').setView([PARK_LAT, PARK_LNG], 17);
+
+        // OpenStreetMap layout
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Current Location Marker
+        let currentMarker = null;
+
+        // GPS Verification Logic
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition((position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const accuracy = position.coords.accuracy;
+
+                if (currentMarker) {
+                    currentMarker.setLatLng([lat, lng]);
+                } else {
+                    currentMarker = L.circle([lat, lng], {
+                        color: 'blue',
+                        fillColor: '#30f',
+                        fillOpacity: 0.5,
+                        radius: accuracy
+                    }).addTo(map);
+
+                    // Center map on first location fix
+                    map.setView([lat, lng]);
+                }
+            }, (err) => {
+                console.warn('GPS Error:', err);
+                alert('GPS情報の取得に失敗しました。位置情報サービスを許可してください。');
+            }, {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            });
+        } else {
+            alert('お使いのブラウザはGPSに対応していません。');
+        }
+
+        // Mock Windmill Pins (Distributed around the park center)
+        // In a real scenario, we would tag exact coordinates of each windmill.
+        const windmills = [
+            { id: 1, lat: PARK_LAT + 0.0005, lng: PARK_LNG, name: "風車1号" },
+            { id: 2, lat: PARK_LAT - 0.0005, lng: PARK_LNG, name: "風車2号" },
+            { id: 3, lat: PARK_LAT, lng: PARK_LNG + 0.0005, name: "風車3号" },
+            { id: 4, lat: PARK_LAT, lng: PARK_LNG - 0.0005, name: "風車4号" },
+            { id: 5, lat: PARK_LAT + 0.0003, lng: PARK_LNG + 0.0003, name: "風車5号" },
+            { id: 6, lat: PARK_LAT - 0.0003, lng: PARK_LNG - 0.0003, name: "風車6号" },
+            { id: 7, lat: PARK_LAT + 0.0003, lng: PARK_LNG - 0.0003, name: "風車7号" },
+        ];
+
+        windmills.forEach(w => {
+            L.marker([w.lat, w.lng]).addTo(map)
+                .bindPopup(`<b>${w.name}</b><br>クエスト未達成`);
+        });
+
+    </script>
+</body>
+
+</html>

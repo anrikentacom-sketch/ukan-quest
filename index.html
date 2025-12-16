@@ -57,25 +57,34 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
-        // うかん常山公園の座標 (住所検索による概算)
-        // Address: 4882-1 Ukancho Ukan, Takahashi, Okayama
-        const PARK_LAT = 34.869372;
-        const PARK_LNG = 133.567156;
+        // テスト用指定座標 (ユーザー現在地)
+        // From: https://maps.app.goo.gl/L946QkJohRHJFSyJ6
+        const PARK_LAT = 34.904413;
+        const PARK_LNG = 133.663117;
 
-        const map = L.map('map').setView([PARK_LAT, PARK_LNG], 17);
+        const map = L.map('map').setView([PARK_LAT, PARK_LNG], 18);
 
         // OpenStreetMap layout
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Current Location Marker
+        // Mock Windmill Pins (Static around the specified test location)
+        const windmills = [
+            { id: 1, lat: PARK_LAT + 0.0002, lng: PARK_LNG, name: "テスト風車1号" },
+            { id: 2, lat: PARK_LAT - 0.0002, lng: PARK_LNG, name: "テスト風車2号" },
+            { id: 3, lat: PARK_LAT, lng: PARK_LNG + 0.0002, name: "テスト風車3号" },
+            { id: 4, lat: PARK_LAT, lng: PARK_LNG - 0.0002, name: "テスト風車4号" },
+        ];
+
+        windmills.forEach(w => {
+            L.marker([w.lat, w.lng]).addTo(map)
+                .bindPopup(`<b>${w.name}</b><br>クエスト未達成`);
+        });
+
+        // Current Location Marker (GPS)
         let currentMarker = null;
 
-        // Flag to generate pins only once
-        let isInitialized = false;
-
-        // GPS Verification Logic
         if (navigator.geolocation) {
             navigator.geolocation.watchPosition((position) => {
                 const lat = position.coords.latitude;
@@ -92,17 +101,9 @@
                         radius: accuracy
                     }).addTo(map);
                 }
-
-                // Initial Setup on first GPS fix: Center Map & Generate Local Pins
-                if (!isInitialized) {
-                    isInitialized = true;
-                    map.setView([lat, lng], 18); // Zoom in for walking test
-                    generateLocalWindmills(lat, lng);
-                }
-
             }, (err) => {
                 console.warn('GPS Error:', err);
-                alert('GPS情報の取得に失敗しました。位置情報サービスを許可してください。');
+                // GPS fails silently, but map is already visible at test location
             }, {
                 enableHighAccuracy: true,
                 timeout: 5000,
@@ -111,30 +112,6 @@
         } else {
             alert('お使いのブラウザはGPSに対応していません。');
         }
-
-        // Function to generate mock pins around the user
-        function generateLocalWindmills(centerLat, centerLng) {
-            // Create pins in a small circle (radius ~20-30m) around the user
-            // 0.0002 deg is roughly 22 meters
-            const offsets = [
-                { lat: 0.0002, lng: 0 },
-                { lat: -0.0002, lng: 0 },
-                { lat: 0, lng: 0.0002 },
-                { lat: 0, lng: -0.0002 },
-                { lat: 0.00015, lng: 0.00015 },
-                { lat: -0.00015, lng: -0.00015 },
-            ];
-
-            offsets.forEach((offset, index) => {
-                const wLat = centerLat + offset.lat;
-                const wLng = centerLng + offset.lng;
-                L.marker([wLat, wLng]).addTo(map)
-                    .bindPopup(`<b>テスト風車${index + 1}号</b><br>現在地から生成`);
-            });
-
-            alert('現在地の周囲にテスト用ピンを生成しました！');
-        }
-
     </script>
 </body>
 

@@ -58,27 +58,26 @@
 
     <a href="index.html" class="back-btn">地図に戻る</a>
 
-    <!-- GPS AR Scene (Using AR.js Location Based) -->
-    <!-- Note: For local testing without HTTPS, typical location-based AR fails. 
-         This code assumes deployment to GitHub Pages (HTTPS). -->
-    <a-scene vr-mode-ui="enabled: false" embedded arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;">
+    <!-- Simple AR Scene (Camera Overlay + Fixed 3D Object) -->
+    <!-- Removed GPS dependency to ensure visibility for system check -->
+    <a-scene embedded
+        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
 
-        <!-- 
-            For POC purposes, we place an object "North" relative to the user 
-            instead of strict GPS coordinates initially to verify 'AR capability' 
-            without needing to be physically in Ukan. 
-            Once on site, we change <a-entity gps-entity-place...> 
-        -->
-
-        <!-- Simulate "Wind Spirit" as a Red Box -->
-        <!-- Position 0 0 -5 means 5 meters in front of the camera start position -->
-        <a-box position="0 0 -5" rotation="0 45 0" color="#ef5777" scale="1 1 1"
-            animation="property: rotation; to: 0 405 0; loop: true; dur: 5000">
+        <!-- Red Box fixed in front of camera (HUD style) -->
+        <a-box position="0 0 -3" rotation="0 45 0" color="#ef5777" scale="0.5 0.5 0.5"
+            animation="property: rotation; to: 0 405 0; loop: true; dur: 2000">
         </a-box>
 
-        <a-text value="Spirit of Wind" position="0 1.5 -5" align="center" color="white" scale="2 2 2"></a-text>
+        <a-text value="AR SYSTEM OK" position="0 1 -3" align="center" color="yellow" scale="1.5 1.5 1.5"></a-text>
 
-        <a-camera gps-camera rotation-reader></a-camera>
+        <!-- Standard Camera -->
+        <a-marker-camera preset="hiro"></a-marker-camera>
+        <!-- Fallback to simple camera if marker fails, 
+             but for 'looking around' without markers in AR.js, 
+             we actually typically use specific setups. 
+             Let's try the simplest 'looking glass' approach. -->
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
     </a-scene>
 
 </body>

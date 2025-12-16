@@ -72,6 +72,9 @@
         // Current Location Marker
         let currentMarker = null;
 
+        // Flag to generate pins only once
+        let isInitialized = false;
+
         // GPS Verification Logic
         if (navigator.geolocation) {
             navigator.geolocation.watchPosition((position) => {
@@ -88,10 +91,15 @@
                         fillOpacity: 0.5,
                         radius: accuracy
                     }).addTo(map);
-
-                    // Center map on first location fix
-                    map.setView([lat, lng]);
                 }
+
+                // Initial Setup on first GPS fix: Center Map & Generate Local Pins
+                if (!isInitialized) {
+                    isInitialized = true;
+                    map.setView([lat, lng], 18); // Zoom in for walking test
+                    generateLocalWindmills(lat, lng);
+                }
+
             }, (err) => {
                 console.warn('GPS Error:', err);
                 alert('GPS情報の取得に失敗しました。位置情報サービスを許可してください。');
@@ -104,22 +112,28 @@
             alert('お使いのブラウザはGPSに対応していません。');
         }
 
-        // Mock Windmill Pins (Distributed around the park center)
-        // In a real scenario, we would tag exact coordinates of each windmill.
-        const windmills = [
-            { id: 1, lat: PARK_LAT + 0.0005, lng: PARK_LNG, name: "風車1号" },
-            { id: 2, lat: PARK_LAT - 0.0005, lng: PARK_LNG, name: "風車2号" },
-            { id: 3, lat: PARK_LAT, lng: PARK_LNG + 0.0005, name: "風車3号" },
-            { id: 4, lat: PARK_LAT, lng: PARK_LNG - 0.0005, name: "風車4号" },
-            { id: 5, lat: PARK_LAT + 0.0003, lng: PARK_LNG + 0.0003, name: "風車5号" },
-            { id: 6, lat: PARK_LAT - 0.0003, lng: PARK_LNG - 0.0003, name: "風車6号" },
-            { id: 7, lat: PARK_LAT + 0.0003, lng: PARK_LNG - 0.0003, name: "風車7号" },
-        ];
+        // Function to generate mock pins around the user
+        function generateLocalWindmills(centerLat, centerLng) {
+            // Create pins in a small circle (radius ~20-30m) around the user
+            // 0.0002 deg is roughly 22 meters
+            const offsets = [
+                { lat: 0.0002, lng: 0 },
+                { lat: -0.0002, lng: 0 },
+                { lat: 0, lng: 0.0002 },
+                { lat: 0, lng: -0.0002 },
+                { lat: 0.00015, lng: 0.00015 },
+                { lat: -0.00015, lng: -0.00015 },
+            ];
 
-        windmills.forEach(w => {
-            L.marker([w.lat, w.lng]).addTo(map)
-                .bindPopup(`<b>${w.name}</b><br>クエスト未達成`);
-        });
+            offsets.forEach((offset, index) => {
+                const wLat = centerLat + offset.lat;
+                const wLng = centerLng + offset.lng;
+                L.marker([wLat, wLng]).addTo(map)
+                    .bindPopup(`<b>テスト風車${index + 1}号</b><br>現在地から生成`);
+            });
+
+            alert('現在地の周囲にテスト用ピンを生成しました！');
+        }
 
     </script>
 </body>
